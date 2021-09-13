@@ -26,24 +26,24 @@
 
 // Check failure of by-index access of string characters (IE < 9)
 // and failure of `0 in boxedString` (Rhino)
-const boxedString = Object("a"),
-    splitString = boxedString[0] != "a" || !(0 in boxedString);
+const boxedString = Object('a');
+    const splitString = boxedString[0] != 'a' || !(0 in boxedString);
 
-export var forEach = function forEach(array, fun) {  
+export var forEach = function forEach(array, fun) {
   const thisp = arguments[2];
   if (Array.prototype.indexOf) {
 	  return array.forEach(fun);
   }
-  let object = toObject(array),
-      self = splitString && _toString(object) == "[object String]" ? object.split("") : object,
-      i = -1,
-      length = self.length >>> 0;
+  const object = toObject(array);
+      const self = splitString && _toString(object) == '[object String]' ? object.split('') : object;
+      let i = -1;
+      const length = self.length >>> 0;
 
   // If no callback function or if callback is not a callable function
-  if (_toString(fun) != "[object Function]") {
+  if (_toString(fun) != '[object Function]') {
     throw new TypeError(); // TODO message
   }
-    
+
   while (++i < length) {
     if (i in self) {
       // Invoke the callback function with call, passing arguments:
@@ -54,26 +54,25 @@ export var forEach = function forEach(array, fun) {
   }
 };
 
-
 // ES5 15.4.4.20
 // http://es5.github.com/#x15.4.4.20
 // https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/filter
-export var filter = function filter(array, fun /*, thisp */) {
+export var filter = function filter(array, fun /* , thisp */) {
   const thisp = arguments[2];
   if (Array.prototype.filter) {
 	  return array.filter(fun);
   }
-  let object = toObject(array),
-      self = splitString && _toString(array) == "[object String]" ? array.split("") : object,
-      length = self.length >>> 0,
-      result = [],
-      value;
+  const object = toObject(array);
+      const self = splitString && _toString(array) == '[object String]' ? array.split('') : object;
+      const length = self.length >>> 0;
+      const result = [];
+      let value;
 
   // If no callback function or if callback is not a callable function
-  if (_toString(fun) != "[object Function]") {
-    throw new TypeError(fun + " is not a function");
+  if (_toString(fun) != '[object Function]') {
+    throw new TypeError(`${fun} is not a function`);
   }
-  
+
   for (let i = 0; i < length; i++) {
     if (i in self) {
       value = self[i];
@@ -88,20 +87,20 @@ export var filter = function filter(array, fun /*, thisp */) {
 // ES5 15.4.4.16
 // http://es5.github.com/#x15.4.4.16
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/every
-export var every = function every(array, fun /*, thisp */) {
+export var every = function every(array, fun /* , thisp */) {
   const thisp = arguments[2];
   if (Array.prototype.every) {
 	  return array.every(fun, thisp);
   }
-  const object = toObject(array),
-      self = splitString && _toString(array) == "[object String]" ? array.split("") : object,
-      length = self.length >>> 0;
+  const object = toObject(array);
+      const self = splitString && _toString(array) == '[object String]' ? array.split('') : object;
+      const length = self.length >>> 0;
 
   // If no callback function or if callback is not a callable function
-  if (_toString(fun) != "[object Function]") {
-    throw new TypeError(fun + " is not a function");
+  if (_toString(fun) != '[object Function]') {
+    throw new TypeError(`${fun} is not a function`);
   }
-  
+
   for (let i = 0; i < length; i++) {
     if (i in self && !fun.call(thisp, self[i], i, object)) {
       return false;
@@ -113,18 +112,18 @@ export var every = function every(array, fun /*, thisp */) {
 // ES5 15.4.4.17
 // http://es5.github.com/#x15.4.4.17
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/some
-export var some = function some(array, fun /*, thisp */) {
+export var some = function some(array, fun /* , thisp */) {
   const thisp = arguments[2];
   if (Array.prototype.some) {
 	  return array.some(fun, thisp);
   }
-  const object = toObject(array),
-      self = splitString && _toString(array) == "[object String]" ? array.split("") : object,
-      length = self.length >>> 0;
+  const object = toObject(array);
+      const self = splitString && _toString(array) == '[object String]' ? array.split('') : object;
+      const length = self.length >>> 0;
 
   // If no callback function or if callback is not a callable function
-  if (_toString(fun) != "[object Function]") {
-    throw new TypeError(fun + " is not a function");
+  if (_toString(fun) != '[object Function]') {
+    throw new TypeError(`${fun} is not a function`);
   }
 
   for (let i = 0; i < length; i++) {
@@ -138,13 +137,13 @@ export var some = function some(array, fun /*, thisp */) {
 // ES5 15.4.4.14
 // http://es5.github.com/#x15.4.4.14
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
-export var indexOf = function indexOf(array, sought /*, fromIndex */ ) {
+export var indexOf = function indexOf(array, sought /* , fromIndex */) {
   const fromIndex = arguments[2];
-  if (Array.prototype.indexOf || typeof array === "string") {
+  if (Array.prototype.indexOf || typeof array === 'string') {
 	  return array.indexOf(sought, fromIndex);
   }
-  const self = splitString && _toString(array) == "[object String]" ? array.split("") : toObject(array),
-      length = self.length >>> 0;
+  const self = splitString && _toString(array) == '[object String]' ? array.split('') : toObject(array);
+      const length = self.length >>> 0;
 
   if (!length) {
     return -1;
@@ -154,7 +153,7 @@ export var indexOf = function indexOf(array, sought /*, fromIndex */ ) {
   if (arguments.length > 2) {
     i = toInteger(fromIndex);
   }
-  
+
   // handle negative indices
   i = i >= 0 ? i : Math.max(0, length + i);
   for (; i < length; i++) {
@@ -172,34 +171,34 @@ export var keys = function keys(object) {
 	  return Object.keys(object);
   }
   // http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-  let hasDontEnumBug = true,
-  dontEnums = [
-    "toString",
-    "toLocaleString",
-    "valueOf",
-    "hasOwnProperty",
-    "isPrototypeOf",
-    "propertyIsEnumerable",
-    "constructor"
-  ],
-  dontEnumsLength = dontEnums.length;
-  
-  for (const key in {"toString": null}) {
+  let hasDontEnumBug = true;
+  const dontEnums = [
+    'toString',
+    'toLocaleString',
+    'valueOf',
+    'hasOwnProperty',
+    'isPrototypeOf',
+    'propertyIsEnumerable',
+    'constructor',
+  ];
+  const dontEnumsLength = dontEnums.length;
+
+  for (const key in { toString: null }) {
     hasDontEnumBug = false;
   }
 
-  if ((typeof object != "object" && typeof object != "function") ||
+  if ((typeof object !== 'object' && typeof object !== 'function') ||
       object === null) {
-    throw new TypeError("Object.keys called on a non-object");
+    throw new TypeError('Object.keys called on a non-object');
   }
-  
+
   const keys = [];
   for (const name in object) {
     if (owns(object, name)) {
       keys.push(name);
     }
   }
-  
+
   if (hasDontEnumBug) {
     for (let i = 0, ii = dontEnumsLength; i < ii; i++) {
       const dontEnum = dontEnums[i];
@@ -215,21 +214,21 @@ export var keys = function keys(object) {
 // http://es5.github.com/#x9.9
 export var toObject = function (o) {
   if (o == null) { // this matches both null and undefined
-    throw new TypeError("can't convert " + o + " to object");
+    throw new TypeError(`can't convert ${o} to object`);
   }
   return Object(o);
 };
 
-//var call = Function.prototype.call;
-//var prototypeOfArray = Array.prototype;
+// var call = Function.prototype.call;
+// var prototypeOfArray = Array.prototype;
 const prototypeOfObject = Object.prototype;
-//var _Array_slice_ = prototypeOfArray.slice;
+// var _Array_slice_ = prototypeOfArray.slice;
 // Having a toString local variable name breaks in Opera so use _toString.
-var _toString = function (val) { return prototypeOfObject.toString.apply(val); }; //call.bind(prototypeOfObject.toString);
-var owns = function (object, name) { return prototypeOfObject.hasOwnProperty.call(object, name); }; //call.bind(prototypeOfObject.hasOwnProperty);
+var _toString = function (val) { return prototypeOfObject.toString.apply(val); }; // call.bind(prototypeOfObject.toString);
+var owns = function (object, name) { return prototypeOfObject.hasOwnProperty.call(object, name); }; // call.bind(prototypeOfObject.hasOwnProperty);
 
 export var create = function create(o) {
-  if(Object.create) {
+  if (Object.create) {
     return Object.create(o);
   }
   const F = function () {};
@@ -241,42 +240,41 @@ export var create = function create(o) {
 };
 
 // From: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON
-if (typeof window !== "undefined" && !window.JSON) {
+if (typeof window !== 'undefined' && !window.JSON) {
   window.JSON = {
-    parse: function(sJSON) { return eval('(' + sJSON + ')'); },
+    parse(sJSON) { return eval(`(${sJSON})`); },
     stringify: (function () {
-      const toString = Object.prototype.toString;
+      const { toString } = Object.prototype;
       const isArray = Array.isArray || function (a) { return toString.call(a) === '[object Array]'; };
-      const escMap = {'"': '\\"', '\\': '\\\\', '\b': '\\b', '\f': '\\f', '\n': '\\n', '\r': '\\r', '\t': '\\t'};
-      const escFunc = function (m) { return escMap[m] || '\\u' + (m.charCodeAt(0) + 0x10000).toString(16).substr(1); };
+      const escMap = {
+ '"': '\\"', '\\': '\\\\', '\b': '\\b', '\f': '\\f', '\n': '\\n', '\r': '\\r', '\t': '\\t',
+};
+      const escFunc = function (m) { return escMap[m] || `\\u${(m.charCodeAt(0) + 0x10000).toString(16).substr(1)}`; };
       const escRE = /[\\"\u0000-\u001F\u2028\u2029]/g;
       return function stringify(value) {
         if (value == null) {
           return 'null';
-        } else if (typeof value === 'number') {
+        } if (typeof value === 'number') {
           return isFinite(value) ? value.toString() : 'null';
-        } else if (typeof value === 'boolean') {
+        } if (typeof value === 'boolean') {
           return value.toString();
-        } else if (typeof value === 'object') {
+        } if (typeof value === 'object') {
           if (typeof value.toJSON === 'function') {
             return stringify(value.toJSON());
-          } else if (isArray(value)) {
+          } if (isArray(value)) {
             let res = '[';
-            for (let i = 0; i < value.length; i++)
-              res += (i ? ', ' : '') + stringify(value[i]);
-            return res + ']';
-          } else if (toString.call(value) === '[object Object]') {
+            for (let i = 0; i < value.length; i++) res += (i ? ', ' : '') + stringify(value[i]);
+            return `${res}]`;
+          } if (toString.call(value) === '[object Object]') {
             const tmp = [];
             for (const k in value) {
-              if (value.hasOwnProperty(k))
-                tmp.push(stringify(k) + ': ' + stringify(value[k]));
+              if (value.hasOwnProperty(k)) tmp.push(`${stringify(k)}: ${stringify(value[k])}`);
             }
-            return '{' + tmp.join(', ') + '}';
+            return `{${tmp.join(', ')}}`;
           }
         }
-        return '"' + value.toString().replace(escRE, escFunc) + '"';
+        return `"${value.toString().replace(escRE, escFunc)}"`;
       };
-    })()
+    }()),
   };
 }
-

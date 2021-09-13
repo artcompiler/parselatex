@@ -13,6 +13,13 @@ module.exports = {
   "plugins": [
   ],
   "rules": {
+    "no-continue": 0,
+    "max-len": 0,
+    "no-use-before-define": 0,
+    "no-cond-assign": 0,
+    "no-param-reassign": 0,
+    "operator-linebreak": 0,
+    "no-plusplus": 0,
     "indent": 0,
     "no-multi-spaces": 0,
     "no-mixed-operators": 0,
