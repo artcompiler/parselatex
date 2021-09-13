@@ -75,7 +75,7 @@
 */
 
 import {every, forEach} from "./backward.js";
-const ASSERT = true;
+const ASSERT = true
 export const assert = (function () {
   return !ASSERT ?
     function () { } :
