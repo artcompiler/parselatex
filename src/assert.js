@@ -74,8 +74,7 @@
 
 */
 
-import {every, forEach} from "./backward.js";
-const ASSERT = true
+const ASSERT = true;
 export const assert = (function () {
   return !ASSERT ?
     function () { } :
@@ -95,7 +94,7 @@ export const message = function (errorCode, args) {
   let str = Assert.messages[errorCode];
   const location = Assert.location;
   if (args) {
-    forEach(args, function (arg, i) {
+    args.forEach(args, function (arg, i) {
       str = str.replace("%" + (i + 1), arg);
     });
   }
@@ -104,7 +103,7 @@ export const message = function (errorCode, args) {
 
 export const reserveCodeRange = function (first, last, moduleName) {
   assert(first <= last, "Invalid code range");
-  const noConflict = every(Assert.reservedCodes, function (range) {
+  const noConflict = Assert.reservedCodes.every(function (range) {
     return last < range.first || first > range.last;
   });
   assert(noConflict, "Conflicting request for error code range");
