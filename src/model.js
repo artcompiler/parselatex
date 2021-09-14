@@ -58,7 +58,7 @@ import { Decimal } from 'decimal.js';
 import { Assert, assert } from './assert.js';
 import { Ast } from './ast.js';
 
-export const Model = (function () {
+export const Model = (() => {
   function Model() {
   }
 
@@ -108,7 +108,7 @@ export const Model = (function () {
     assert(node instanceof Array ||
            typeof node === 'object' && (node.op || node instanceof Model) ||
            typeof node === 'string', JSON.stringify(node));
-    assert(node != undefined, '1000: Internal error. Node undefined.');
+    assert(node !== undefined, '1000: Internal error. Node undefined.');
     // If we already have a model, then just return it.
     if (node instanceof Model) {
       if (location) {
@@ -538,6 +538,8 @@ lastCharCode;
         case 2:
           text = `\\sqrt[${args[0]}]{${args[1]}}`;
           break;
+        default:
+          break;
         }
         break;
       case OpStr.INT:
@@ -564,13 +566,12 @@ lastCharCode;
               text += '\\times ';
             }
             text += args[index];
-          }
-          // Elide the times symbol if rhs is parenthesized or a var, or lhs is a number
-          // nd rhs is not a number.
-          else if (term.op === OpStr.PAREN ||
-               term.op === OpStr.VAR ||
-               term.op === OpStr.CST ||
-               typeof prevTerm === 'number' && typeof term !== 'number') {
+          } else if (term.op === OpStr.PAREN ||
+                     term.op === OpStr.VAR ||
+                     term.op === OpStr.CST ||
+                     typeof prevTerm === 'number' && typeof term !== 'number') {
+            // Elide the times symbol if rhs is parenthesized or a var, or lhs is a number
+            // nd rhs is not a number.
             text += args[index];
           } else {
             if (index !== 0) {
@@ -1044,23 +1045,25 @@ ch;
     // Manage the token stream.
     let T0 = TK_NONE;
     let T1 = TK_NONE;
-    let lexemeT0; let
-lexemeT1;
+    let lexemeT0;
+    let lexemeT1;
     const scan = scanner(src);
-    // Prime the token stream.
-    function start(options) {
+    function initParser(options) {
+      // Prime the token stream.
       T0 = scan.start(options);
       lexemeT0 = scan.lexeme(options);
     }
-    // Get the current token.
     function hd() {
+      // Get the current token.
       return T0;
     }
-    // Get the current lexeme.
+
     function lexeme() {
+      // Get the current lexeme.
       assert(lexemeT0 !== undefined, `1000: Lexeme for token T0=${T0} is missing.`);
       return lexemeT0;
     }
+    
     // Advance the next token.
     function next(options) {
       if (T1 === TK_NONE) {
@@ -1080,8 +1083,9 @@ lexemeT1;
       }
       return T1;
     }
-    // Consume the current token if it matches, otherwise throw.
+
     function eat(tc, options) {
+      // Consume the current token if it matches, otherwise throw.
       const tk = hd();
       if (tk !== tc) {
         const expected = String.fromCharCode(tc);
@@ -2217,14 +2221,14 @@ args = [];
             expr.isMixedNumber = true;
           } else if (args.length > 0 &&
                      args[args.length - 1].op === Model.VAR &&
-                     expr.op === Model.VAR && expr.args[0].indexOf('"') === 0) {
+                     expr.op === Model.VAR && expr.args[0].indexOf('\'') === 0) {
             // Merge previous var with current '.
             expr = binaryNode(Model.POW, [args.pop(), expr]);
             expr.isImplicit = expr.args[0].isImplicit;
           } else if (args.length > 0 &&
                      (args[args.length - 1].op === Model.MUL || args[args.length - 1].op === Model.DOT) &&  // 2x', 2*x', 2\cdot x'
                      args[args.length - 1].args[args[args.length - 1].args.length - 1].op === Model.VAR &&
-                     expr.op === Model.VAR && expr.args[0].indexOf('"') === 0) {
+                     expr.op === Model.VAR && expr.args[0].indexOf('\'') === 0) {
             t = args.pop();
             expr = multiplyNode(t.args.concat(binaryNode(Model.POW, [t.args.pop(), expr])));
             expr.isImplicit = expr.args[0].isImplicit;
@@ -2232,7 +2236,7 @@ args = [];
                      args[args.length - 1].op === Model.VAR &&
                      expr.op === Model.POW &&
                      expr.args[0].op === Model.VAR &&
-                     expr.args[0].args[0].indexOf('"') === 0) {
+                     expr.args[0].args[0].indexOf('\'') === 0) {
             // Merge previous var with current ' and raise to the power.
             expr = newNode(Model.POW, [binaryNode(Model.POW, [args.pop(), expr.args[0]])].concat(expr.args.slice(1)));
           } else if (args.length > 0 &&
@@ -2804,22 +2808,9 @@ foundDX;
       }
         return expr;
     }
-    // Root syntax.
-    function tokenize() {
-      // Just return a list of lexemes.
-      const args = [];
-      start();
-      while (hd()) {
-        const lex = lexeme(options);
-        args.push(newNode(hd(), lex ? [lex] : []));
-        next();
-      }
-      const node = newNode(Model.COMMA, args);
-      return node;
-    }
     function expr() {
       try {
-        start();
+        initParser();
         if (hd()) {
           let n = commaExpr();
           assert(!hd(), message(1003, [
@@ -2841,7 +2832,6 @@ foundDX;
     // Return a parser object.
     return {
       expr,
-      tokenize,
     };
     // SCANNER
     // Find tokens in the input stream.
@@ -3513,7 +3503,7 @@ foundDX;
           curIndex = startIndex;
         }
         // Group primes into a single var.
-        while (lexeme.lastIndexOf('"') === lexeme.length - 1 && c === CC_SINGLEQUOTE) {
+        while (lexeme.lastIndexOf('\'') === lexeme.length - 1 && c === CC_SINGLEQUOTE) {
           lexeme += String.fromCharCode(c);
           c = src.charCodeAt(curIndex++);
         }
@@ -3603,10 +3593,10 @@ foundDX;
       }
       function prime(c) {
         assert(c === 39);
-        lexeme = '"';
+        lexeme = '\'';
         while (src.charCodeAt(curIndex) === 39) {
           curIndex++;
-          lexeme += '"';
+          lexeme += '\'';
         }
         return TK_VAR;
       }
@@ -3623,4 +3613,4 @@ foundDX;
     }
   };
   return Model;
-}());
+})();

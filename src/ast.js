@@ -21,19 +21,13 @@
   All Ast instances share the same node pool and therefore intern trees of
   identical structure to the same node id.
 
-  Construct new nodes using the following forms:
-    ast.create("+").arg(10).arg(20);
-    ast.create("+", [10, 20]);
-    ast.create({op: "+", args: [10, 20]});
-
   Node manipulation functions are chainable.
 
  */
 
-import { every, forEach } from './backward.js';
-import { Assert, assert } from './assert.js';
+import { assert } from './assert.js';
 
-export const Ast = (function () {
+export const Ast = (() => {
   // Pool of nodes. Shared between all Ast instances.
 
   function Ast() {
@@ -41,31 +35,10 @@ export const Ast = (function () {
     this.nodeMap = {};
   }
 
-  // Create a node for operation 'op'.
-  Ast.prototype.create = function create(op, args) {
-    assert(false, 'Should not get here');
-    // // Create a node that inherits from Ast
-    // let node = create(this);
-    // if (typeof op === "string") {
-    //   node.op = op;
-    //   if (args instanceof Array) {
-    //     node.args = args;
-    //   } else {
-    //     node.args = [];
-    //   }
-    // } else if (op !== null && typeof op === "object") {
-    //   let obj = op;
-    //   forEach(keys(obj), function (v, i) {
-    //     node[v] = obj[v];
-    //   });
-    // }
-    // return node;
-  };
-
   // Append node to this node's args.
   Ast.prototype.arg = function arg(node) {
     if (!isNode(this)) {
-      throw 'Malformed node';
+      throw new Error('Malformed node');
     }
     this.args.push(node);
     return this;
@@ -74,7 +47,7 @@ export const Ast = (function () {
   // Get or set the Nth arg of this node.
   Ast.prototype.argN = function argN(i, node) {
     if (!isNode(this)) {
-      throw 'Malformed node';
+      throw new Error('Malformed node');
     }
     if (node === undefined) {
       return this.args[i];
@@ -86,7 +59,7 @@ export const Ast = (function () {
   // Get or set the args of this node.
   Ast.prototype.args = function args(a) {
     if (!isNode(this)) {
-      throw 'Malformed node';
+      throw new Error('Malformed node');
     }
     if (a === undefined) {
       return this.args;
@@ -117,13 +90,13 @@ export const Ast = (function () {
     const { op } = node;
     const count = node.args.length;
     let args = '';
-    const args_nids = [];
+    const argsNids = [];
     for (let i = 0; i < count; i++) {
       args += ' ';
       if (typeof node.args[i] === 'string') {
-        args += args_nids[i] = node.args[i];
+        args += argsNids[i] = node.args[i];
       } else {
-        args += args_nids[i] = this.intern(node.args[i]);
+        args += argsNids[i] = this.intern(node.args[i]);
       }
     }
     const TK_LEFTBRACE = 0x7B;
@@ -135,10 +108,10 @@ export const Ast = (function () {
     }
     const key = op + count + args;
     let nid = this.nodeMap[key];
-    if (nid === void 0) {
+    if (nid === undefined) {
       this.nodePool.push({
         op,
-        args: args_nids,
+        args: argsNids,
       });
       nid = this.nodePool.length - 1;
       this.nodeMap[key] = nid;
@@ -161,8 +134,7 @@ export const Ast = (function () {
   // Dump the contents of the node pool.
   Ast.prototype.dumpAll = function dumpAll() {
     let s = '';
-    const ast = this;
-    forEach(this.nodePool, (n, i) => {
+    this.nodePool.forEach((n, i) => {
       s += `\n${i}: ${Ast.dump(n)}`;
     });
     return s;
@@ -170,12 +142,13 @@ export const Ast = (function () {
 
   // Dump the contents of a node.
   Ast.dump = Ast.prototype.dump = function dump(n) {
+    let s;
     if (typeof n === 'string') {
-      const s = `"${n}"`;
+      s = `"${n}"`;
     } else if (typeof n === 'number') {
-      const s = n;
+      s = n;
     } else {
-      let s = `{ op: "${n.op}", args: [ `;
+      s = `{ op: "${n.op}", args: [ `;
       for (let i = 0; i < n.args.length; i++) {
         if (i > 0) {
           s += ' , ';
@@ -190,12 +163,10 @@ export const Ast = (function () {
   // Self tests
   const RUN_SELF_TESTS = false;
   function test() {
-    (function () {
-    }());
   }
   if (RUN_SELF_TESTS) {
     test();
   }
 
   return Ast;
-}());
+})();

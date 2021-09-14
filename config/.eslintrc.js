@@ -13,6 +13,14 @@ module.exports = {
   "plugins": [
   ],
   "rules": {
+    "prefer-arrow-callback": 2,
+    "no-multi-assign": 0,
+    "prefer-destructuring": 0,
+    "no-console": 0,
+    "import/extensions": 0,
+    "import/prefer-default-export": 0,
+    "no-shadow": 0,
+    "no-loop-func": 0,
     "no-continue": 0,
     "max-len": 0,
     "no-use-before-define": 0,
