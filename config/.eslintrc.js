@@ -13,7 +13,7 @@ module.exports = {
   "plugins": [
   ],
   "rules": {
-    "prefer-arrow-callback": 2,
+    "prefer-rest-params": 0,
     "no-multi-assign": 0,
     "prefer-destructuring": 0,
     "no-console": 0,
@@ -31,6 +31,7 @@ module.exports = {
     "indent": 0,
     "no-multi-spaces": 0,
     "no-mixed-operators": 0,
+    "prefer-arrow-callback": 2,
     "semi": 2,
     "no-var": 2,
     "prefer-const": 2,

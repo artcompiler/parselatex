@@ -143,7 +143,7 @@ export const Model = (() => {
     // Add missing plugin functions to the Model prototype.
     Object.keys(Model.fn).forEach((v) => {
       if (!Mp[v]) {
-        Mp[v] = function () {
+        Mp[v] = () => {
           const fn = Model.fn[v];
           if (arguments.length > 1 &&
               arguments[1] instanceof Model) {
@@ -1063,7 +1063,7 @@ ch;
       assert(lexemeT0 !== undefined, `1000: Lexeme for token T0=${T0} is missing.`);
       return lexemeT0;
     }
-    
+
     // Advance the next token.
     function next(options) {
       if (T1 === TK_NONE) {
@@ -2377,7 +2377,7 @@ args = [];
              base.op === Model.PAREN &&
              isPolynomial(base.args[0])) &&
             isInteger(expo)) {
-          degree = parseInt(expo.args[0]);
+          degree = parseInt(expo.args[0], 10);
         }
       } else if (node.op === Model.VAR) {
         degree = 1;
@@ -2400,6 +2400,9 @@ args = [];
     function isRepeatingDecimal(args) {
       // '3.' '\overline{..}'
       // '10\times3.' '\overline{..}', prefix=10
+      if (!isNumber(args[0])) {
+        return null;
+      }
       let prefix;
       let isNeg = false;
       if (args[0].op === Model.SUB && args[0].args[0].op === Model.NUM) {
@@ -2410,8 +2413,9 @@ args = [];
         prefix = args[0].args.slice(0, args[0].args.length - 1);
         args = args[0].args.slice(args[0].args.length - 1).concat(args[1]);
       }
-      let expr; let n0; let
-n1;
+      let expr;
+      let n0;
+      let n1;
       if (!args[0].lbrk &&
           (args[0].op === Model.NUM && args[0].numberFormat === 'decimal' ||
            args[0].op === Model.VAR && args[0].args[0] === '?' ||
@@ -3327,6 +3331,8 @@ foundDX;
             case 125: // right brace
               curIndex++;
               return TK_RIGHTBRACESET;
+            default:
+              break;
             }
             tk = latex();
             if (tk !== null) {
