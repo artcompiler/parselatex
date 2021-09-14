@@ -143,7 +143,7 @@ export const Model = (() => {
     // Add missing plugin functions to the Model prototype.
     Object.keys(Model.fn).forEach((v) => {
       if (!Mp[v]) {
-        Mp[v] = (...rest) => {
+        Mp[v] = function (...rest) {
           const fn = Model.fn[v];
           if (rest.length > 1 &&
               rest[1] instanceof Model) {
