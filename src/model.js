@@ -3623,4 +3623,4 @@ foundDX;
     }
   };
   return Model;
-}());
+})();
