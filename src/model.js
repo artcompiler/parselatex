@@ -54,7 +54,7 @@
 
 */
 
-import { Decimal } from 'decimal.js';
+import Decimal from 'decimal.js';
 import { Assert, assert } from './assert.js';
 import { Ast } from './ast.js';
 
@@ -75,6 +75,10 @@ export const Model = (() => {
   Model.popEnv = function popEnv() {
     assert(envStack.length > 0, '1000: Empty envStack');
     Model.env = env = envStack.pop();
+  };
+
+  Model.option = (options, key) => {
+    return options[key];
   };
 
   function isChemCore() {
