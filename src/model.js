@@ -1055,8 +1055,8 @@ ch;
       lexemeT0 = scan.lexeme(options);
     }
 
-    // Get the current token.
     function hd() {
+      // Get the current token.
       return T0;
     }
 
@@ -2416,7 +2416,9 @@ args = [];
         prefix = args[0].args.slice(0, args[0].args.length - 1);
         args = args[0].args.slice(args[0].args.length - 1).concat(args[1]);
       }
-      let expr; let n0; let n1;
+      let expr;
+      let n0;
+      let n1;
       if (!args[0].lbrk &&
           (args[0].op === Model.NUM && args[0].numberFormat === 'decimal' ||
            args[0].op === Model.VAR && args[0].args[0] === '?' ||
@@ -2813,8 +2815,6 @@ foundDX;
       }
         return expr;
     }
-
-    // Root syntax.
     function expr() {
       try {
         initParser();
