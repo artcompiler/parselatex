@@ -12,7 +12,13 @@ module.exports = {
   },
   "plugins": [
   ],
+  "globals": {
+    "test": "readonly",
+    "expect": "readonly",
+  },
   "rules": {
+    "padded-blocks": 0,
+    "arrow-body-style": 0,
     "func-names": 0,
     "no-multi-assign": 0,
     "prefer-destructuring": 0,

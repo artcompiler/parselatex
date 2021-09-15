@@ -59,20 +59,18 @@ import { Assert, assert } from './assert.js';
 import { Ast } from './ast.js';
 
 export const Model = (() => {
-  function Model() {
-  }
-
+  function Model() {}
   const envStack = [];
   let env = {};
   Model.fn = {};
   Model.env = env;
 
-  Model.pushEnv = function pushEnv(e) {
+  Model.pushEnv = (e) => {
     envStack.push(env);
     Model.env = env = e;
   };
 
-  Model.popEnv = function popEnv() {
+  Model.popEnv = () => {
     assert(envStack.length > 0, '1000: Empty envStack');
     Model.env = env = envStack.pop();
   };

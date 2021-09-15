@@ -5,14 +5,14 @@ function stripMetadata(node) {
   if (!node.op) {
     return node;
   }
-  Object.keys(node).forEach(function (k) {
-    if (k !== "op" &&
-        k !== "args") {
+  Object.keys(node).forEach((k) => {
+    if (k !== 'op' &&
+        k !== 'args') {
       delete node[k];
     }
   });
   if (node.args) {
-    node.args.forEach(function (n) {
+    node.args.forEach((n) => {
       stripMetadata(n);
     });
   }
@@ -29,7 +29,7 @@ test('1 + 2', () => {
     }, {
       op: Model.NUM,
       args: ['2'],
-    }]
+    }],
   };
   expect(JSON.stringify(nodeRecieved)).toBe(JSON.stringify(nodeExpected));
 });

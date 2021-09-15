@@ -1,3 +1,5 @@
+default: lint test
+
 lint:
 	npm run lint
 
