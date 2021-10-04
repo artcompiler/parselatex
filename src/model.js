@@ -3297,7 +3297,7 @@ foundDX;
         );
       }
 
-      function start() {
+      function start(options) {
         // Start scanning for one token.
         if (!options) {
           options = {};
