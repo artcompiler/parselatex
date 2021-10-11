@@ -5,7 +5,7 @@ A library for parsing LaTeX
 
 This module implements a LaTeX parser.
 
-#### BUILD
+#### BUILDING
 
 ```
 $ make
@@ -13,10 +13,18 @@ $ make
 
 This command will run ESLint linter and Jest tests.
 
+#### TESTING
+
+```
+$ make test
+```
+
+This command will run ESLint linter and Jest tests.
+
 #### INSTALLING
 
 ```
-$ npm i './parselatex'
+$ npm i './parselatex' # where ./parselatex refers to the working parselatex directory
 ```
 
 where `./parselatex` refers to the directory that contains this repo.
