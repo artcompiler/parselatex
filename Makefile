@@ -5,3 +5,8 @@ lint:
 
 test:
 	npm run test
+
+update-dependencies:
+	npm pack .
+
+.PHONY: test

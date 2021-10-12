@@ -8,10 +8,6 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "lint": "npx eslint --config config/.eslintrc.js src"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/artcompiler/parselatex.git"
-  },
   "author": "https://github.com/jeffdyer",
   "license": "MIT",
   "bugs": {
