@@ -325,6 +325,7 @@ export const Model = (() => {
   OpToLaTeX[OpStr.ADD] = '+';
   OpToLaTeX[OpStr.SUB] = '-';
   OpToLaTeX[OpStr.MUL] = '\\times';
+  OpToLaTeX[OpStr.TIMES] = '\\times';
   OpToLaTeX[OpStr.DIV] = '\\div';
   OpToLaTeX[OpStr.FRAC] = '\\frac';
   OpToLaTeX[OpStr.EQL] = '=';
@@ -550,8 +551,7 @@ lastCharCode;
       case OpStr.VEC:
         text = `\\vec{${args[0]}}`;
         break;
-      case OpStr.MUL:
-      case OpStr.TIMES: {
+      case OpStr.MUL: {
         // If subexpr is lower precedence, wrap in parens.
         let prevTerm;
         text = '';
@@ -585,13 +585,14 @@ lastCharCode;
         });
         break;
       }
+      case OpStr.TIMES:
       case OpStr.ADD:
       case OpStr.COMMA:
         args.forEach((value, index) => {
           if (index === 0) {
             text = value;
           } else {
-            text = `${text} ${OpToLaTeX[n.op]} ${value}`;
+            text = `${text}${OpToLaTeX[n.op]} ${value}`;
           }
         });
         break;
