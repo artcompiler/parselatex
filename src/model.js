@@ -2315,7 +2315,8 @@ args = [];
     }
     function isMixedNumber(n0, n1) {
       // 3\frac{1}{2} but not 3(\frac{1}{2}) or 3 1.0/2 or 3 3/2
-      if (n0.op === Model.SUB && n0.args.length === 1) {
+      if ((n0.op === Model.SUB || n0.op === Model.ADD) &&
+           n0.args.length === 1) {
         n0 = n0.args[0];
       }
       if (!n0.lbrk && !n1.lbrk &&
