@@ -1112,7 +1112,8 @@ ch;
             node.args[1];
         return (
           n0.op === Model.NUM && n0.numberFormat === 'integer' &&
-            n1.op === Model.NUM && n1.numberFormat === 'integer'
+            n1.op === Model.NUM && n1.numberFormat === 'integer' &&
+            +n1.args[0] !== 0
         );
       }
       return false;
