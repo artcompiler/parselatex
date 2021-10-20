@@ -1100,16 +1100,20 @@ ch;
     }
     // Begin parsing functions.
     function isSimpleFraction(node) {
-      if (node.op === Model.FRAC) {
+      if (node.op === Model.FRAC &&
+          (node.args[0].op === Model.NUM || node.args[1].op === Model.NUM)) {
         const n0 =
-            node.args[0].op === Model.SUB && node.args[0].args.length === 1 && node.args[0].args[0] ||
+            (node.args[0].op === Model.SUB || node.args[0].op === Model.ADD) &&
+            node.args[0].args.length === 1 && node.args[0].args[0] ||
             node.args[0];
         const n1 =
-            node.args[1].op === Model.SUB && node.args[1].args.length === 1 && node.args[1].args[0] ||
+            (node.args[1].op === Model.SUB || node.args[1].op === Model.ADD) &&
+            node.args[1].args.length === 1 && node.args[1].args[0] ||
             node.args[1];
         return (
           n0.op === Model.NUM && n0.numberFormat === 'integer' &&
-            n1.op === Model.NUM && n1.numberFormat === 'integer'
+            n1.op === Model.NUM && n1.numberFormat === 'integer' &&
+            +n1.args[0] !== 0
         );
       }
       return false;
