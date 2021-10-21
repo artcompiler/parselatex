@@ -325,6 +325,7 @@ export const Model = (() => {
   OpToLaTeX[OpStr.ADD] = '+';
   OpToLaTeX[OpStr.SUB] = '-';
   OpToLaTeX[OpStr.MUL] = '\\times';
+  OpToLaTeX[OpStr.TIMES] = '\\times';
   OpToLaTeX[OpStr.DIV] = '\\div';
   OpToLaTeX[OpStr.FRAC] = '\\frac';
   OpToLaTeX[OpStr.EQL] = '=';
@@ -550,8 +551,7 @@ lastCharCode;
       case OpStr.VEC:
         text = `\\vec{${args[0]}}`;
         break;
-      case OpStr.MUL:
-      case OpStr.TIMES: {
+      case OpStr.MUL: {
         // If subexpr is lower precedence, wrap in parens.
         let prevTerm;
         text = '';
@@ -585,13 +585,14 @@ lastCharCode;
         });
         break;
       }
+      case OpStr.TIMES:
       case OpStr.ADD:
       case OpStr.COMMA:
         args.forEach((value, index) => {
           if (index === 0) {
             text = value;
           } else {
-            text = `${text} ${OpToLaTeX[n.op]} ${value}`;
+            text = `${text}${OpToLaTeX[n.op]} ${value}`;
           }
         });
         break;
@@ -2256,7 +2257,9 @@ args = [];
             const tmp = args.pop();
             expr = binaryNode(Model.POW, [numberNode(options, '10'), unaryExpr()]);
             expr = binaryNode(Model.TIMES, [tmp, expr]);
-            expr.isScientific = true;
+            if (isScientific(expr.args)) {
+              expr.isScientific = true;
+            }
           } else if (!isChemCore() && isPolynomialTerm(args[args.length - 1], expr)) {
             // 2x, -3y but not CH (in chem)
             expr.isPolynomialTerm = true;
@@ -2467,23 +2470,12 @@ args = [];
 
     function isScientific(args) {
       let n;
-      if (args.length === 1) {
-        // 1.2, 10^2
-        if ((n = isNumber(args[0])) &&
-            (n.args[0].length === 1 || n.args[0].indexOf('.') === 1)) {
-          return true;
-        } if (args[0].op === Model.POW &&
-                   (n = isNumber(args[0].args[0])) && n.args[0] === '10' &&
-                   isInteger(args[0].args[1])) {
-          return true;
-        }
-        return false;
-      } if (args.length === 2) {
+      if (args.length === 2) {
         // 1.0 \times 10 ^ 1
         const a = args[0];
         const e = args[1];
         if ((n = isNumber(a)) &&
-            (n.args[0].length === 1 || n.args[0].indexOf('.') === 1) &&
+            (1 <= +n.args[0] && +n.args[0] < 10) &&
             e.op === Model.POW &&
             (n = isNumber(e.args[0])) && n.args[0] === '10' &&
             isInteger(e.args[1])) {
