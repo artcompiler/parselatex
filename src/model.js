@@ -768,6 +768,8 @@ lastCharCode;
   const TK_LANGLE = 0x177;
   const TK_RANGLE = 0x178;
   const TK_DOT = 0x179;
+  const TK_IINT = 0x17A;
+  const TK_IIINT = 0x17B;
 
   // Define mapping from token to operator
   const tokenToOperator = {};
@@ -1481,6 +1483,8 @@ foundDX;
       case TK_LIM:
         return limitExpr();
       case TK_INT:
+      case TK_IINT:
+      case TK_IIINT:
         return integralExpr();
       case TK_SUM:
       case TK_PROD:
@@ -2663,41 +2667,50 @@ args = [];
       }
       return node;
     }
-    function integralExpr() {
-      eat(TK_INT);
+    function integralExpr(tk) {
+      let expr; let foundDX;
       const parsingIntegralExpr = Model.option(options, 'parsingIntegralExpr', true);
       const args = [];
-      // Collect the subscript and expression
-      if (hd() === TK_UNDERSCORE) {
-        next({ oneCharToken: true });
-        args.push(primaryExpr());
-        if (hd() === TK_CARET) {
-          eat(TK_CARET, { oneCharToken: true });
-          args.push(primaryExpr());
-        }
-      }
-      let expr; let
-foundDX;
-      if (hd() === TK_INT) {
-        expr = integralExpr();
+      if (hd() === TK_IIINT) {
+        eat(TK_IIINT);
+        expr = integralExpr(TK_IIINT);
+        foundDX = hasDX(options, flattenNestedNodes(multiplicativeExpr()));
+      } else if (hd() === TK_IINT || tk === TK_IIINT) {
+        tk === TK_IIINT || eat(TK_IINT);
+        expr = integralExpr(TK_IINT);
         foundDX = hasDX(options, flattenNestedNodes(multiplicativeExpr()));
       } else {
-        expr = flattenNestedNodes(multiplicativeExpr());
-        let t;
-        foundDX = hasDX(options, expr);
-        expr = foundDX && stripDX(expr) || expr;
-        while (isAdditive(t = hd()) && !foundDX) {
-          next();
-          let expr2 = flattenNestedNodes(multiplicativeExpr());
-          foundDX = hasDX(options, expr2);
-          expr2 = foundDX && stripDX(expr2) || expr2;
-          switch (t) {
-          case TK_SUB:
-            expr = binaryNode(Model.SUB, [expr, expr2]);
-            break;
-          default:
-            expr = binaryNode(Model.ADD, [expr, expr2], true /* flatten */);
-            break;
+        tk === TK_IINT || eat(TK_INT);
+        // Collect the subscript and expression
+        if (hd() === TK_UNDERSCORE) {
+          next({ oneCharToken: true });
+          args.push(primaryExpr());
+          if (hd() === TK_CARET) {
+            eat(TK_CARET, { oneCharToken: true });
+            args.push(primaryExpr());
+          }
+        }
+        if (hd() === TK_INT) {
+          expr = integralExpr();
+          foundDX = hasDX(options, flattenNestedNodes(multiplicativeExpr()));
+        } else {
+          expr = flattenNestedNodes(multiplicativeExpr());
+          let t;
+          foundDX = hasDX(options, expr);
+          expr = foundDX && stripDX(expr) || expr;
+          while (isAdditive(t = hd()) && !foundDX) {
+            next();
+            let expr2 = flattenNestedNodes(multiplicativeExpr());
+            foundDX = hasDX(options, expr2);
+            expr2 = foundDX && stripDX(expr2) || expr2;
+            switch (t) {
+            case TK_SUB:
+              expr = binaryNode(Model.SUB, [expr, expr2]);
+              break;
+            default:
+              expr = binaryNode(Model.ADD, [expr, expr2], true /* flatten */);
+              break;
+            }
           }
         }
       }
@@ -2952,6 +2965,8 @@ foundDX;
         '\\to': TK_TO,
         '\\sum': TK_SUM,
         '\\int': TK_INT,
+        '\\iint': TK_IINT,
+        '\\iiint': TK_IIINT,
         '\\prod': TK_PROD,
         '\\cup': TK_CUP,
         '\\bigcup': TK_BIGCUP,
