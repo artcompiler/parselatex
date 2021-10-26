@@ -3244,7 +3244,7 @@ args = [];
         0x03B2: '\\beta',
         0x03B3: '\\gamma',
         0x03B4: '\\delta',
-        0x03B5: '\\epsilon',
+        0x03B5: '\\varepsilon',
         0x03B6: '\\zeta',
         0x03B7: '\\eta',
         0x03B8: '\\theta',
@@ -3257,14 +3257,19 @@ args = [];
         0x03BF: 'o',
         0x03C0: '\\pi',
         0x03C1: '\\rho',
-        0x03C2: null,
+        0x03C2: '\\varsigma',
         0x03C3: '\\sigma',
         0x03C4: '\\tau',
         0x03C5: '\\upsilon',
-        0x03C6: '\\phi',
+        0x03C6: '\\varphi',
         0x03C7: '\\chi',
         0x03C8: '\\psi',
         0x03C9: '\\omega',
+        0x03D1: '\\vartheta',
+        0x03D5: '\\phi',
+        0x03D6: '\\varpi',
+        0x03F1: '\\varrho',
+        0x03F5: '\\epsilon',
         0x0391: 'A',
         0x0392: 'B',
         0x0393: '\\Gamma',
@@ -3421,6 +3426,7 @@ args = [];
               if (tk === undefined) {
                 tk = TK_VAR;   // e.g. \\theta
               }
+              curIndex++;
               return tk;
             } if (matchDecimalSeparator(String.fromCharCode(c)) ||
                        isNumberCharCode(c)) {
