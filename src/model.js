@@ -1248,17 +1248,7 @@ foundDX;
         next();
         const n = braceExpr();
         const k = braceExpr();
-        // (n k) = \frac{n!}{k!(n-k)!}
-        const num = unaryNode(Model.FACT, [n]);
-        const den = binaryNode(Model.POW, [
-          binaryNode(Model.MUL, [
-            unaryNode(Model.FACT, [k]),
-            unaryNode(Model.FACT, [binaryNode(Model.ADD, [n, negate(k)])]),
-          ]),
-          nodeMinusOne,
-        ]);
-        node = binaryNode(Model.MUL, [num, den]);
-        node.isBinomial = true;
+        node = binaryNode(Model.BINOM, [n, k]);
         break;
       }
       case TK_SQRT:
@@ -2150,7 +2140,6 @@ args = [];
         expr = derivativeExpr(expr);
       }
       if (expr.op === Model.MUL &&
-          !expr.isBinomial &&
           !Model.option(options, 'compareGrouping') &&
           expr.args[expr.args.length - 1].op !== Model.VAR &&
           expr.args[expr.args.length - 1].args[0] === '\\degree') {
