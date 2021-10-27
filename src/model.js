@@ -1134,12 +1134,15 @@ ch;
       return false;
     }
     function primaryExpr() {
-      let t; let node; let tk; let op; let base; let args = []; let expr; let expr1; let expr2; let
-foundDX;
+      let t; let node; let tk; let op; let base; let args = [];
+      let expr; let expr1; let expr2; let foundDX;
       switch ((tk = hd())) {
       case TK_CONST:
       case TK_VAR:
         args = [lexeme(options)];
+        if (args[0] === "\\emptyset") {
+          args[0] = "\\varnothing";
+        }
         next();
         // // Collect the subscript if there is one. Subscripts make multipart variable names.
         // if ((t=hd())===TK_UNDERSCORE) {
