@@ -3546,6 +3546,9 @@ args = [];
         }
         let tk = lexemeToToken[lexeme];
         if (tk === undefined) {
+          if (lexeme === '\\emptyset') {
+            lexeme = '\\varnothing';
+          }
           tk = TK_VAR;   // e.g. \\theta
         } else if (tk === TK_OPERATORNAME) {
           c = src.charCodeAt(curIndex++);
