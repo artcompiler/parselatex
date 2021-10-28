@@ -2983,6 +2983,7 @@ args = [];
         '\\rangle': TK_RANGLE,
       };
       const unicodeToLaTeX = {
+        0x00A2: '\\cent',
         0x00B0: '\\degree',
         0x2200: '\\forall',
         0x2201: '\\complement',
@@ -3426,7 +3427,6 @@ args = [];
               if (tk === undefined) {
                 tk = TK_VAR;   // e.g. \\theta
               }
-              curIndex++;
               return tk;
             } if (matchDecimalSeparator(String.fromCharCode(c)) ||
                        isNumberCharCode(c)) {
