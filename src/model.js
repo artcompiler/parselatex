@@ -1057,7 +1057,7 @@ ch;
     function initParser(options) {
       // Prime the token stream.
       T0 = scan.start(options);
-      lexemeT0 = scan.lexeme(options);
+      lexemeT0 = scan.lexeme();
     }
 
     function hd() {
@@ -1075,7 +1075,7 @@ ch;
     function next(options) {
       if (T1 === TK_NONE) {
         T0 = scan.start(options);
-        lexemeT0 = scan.lexeme(options);
+        lexemeT0 = scan.lexeme();
       } else {
         assert(lexemeT1 !== undefined, `1000: Lexeme for token=${T1} is missing.`);
         T0 = T1;
@@ -1086,7 +1086,7 @@ ch;
     function lookahead(options) {
       if (T1 === TK_NONE) {
         T1 = scan.start(options);
-        lexemeT1 = scan.lexeme(options);
+        lexemeT1 = scan.lexeme();
       }
       return T1;
     }
@@ -1139,16 +1139,15 @@ ch;
       switch ((tk = hd())) {
       case TK_CONST:
       case TK_VAR:
-        args = [lexeme(options)];
+        args = [lexeme()];
+        next();
         if (args[0] === "\\emptyset") {
           args[0] = "\\varnothing";
+        } else if (args[0] === "\\degree" && hd() === TK_TEXT && (
+          lexeme() === 'K' || lexeme() === 'C' || lexeme() === 'F')) {
+          args[0] = `\\degree ${lexeme()}`;
+          next();
         }
-        next();
-        // // Collect the subscript if there is one. Subscripts make multipart variable names.
-        // if ((t=hd())===TK_UNDERSCORE) {
-        //   next({oneCharToken: true});
-        //   args.push(primaryExpr());   // {op:VAR, args:['Fe', '2']}
-        // }
         node = newNode(Model.VAR, args);
         if (isChemCore()) {
           if (hd() === TK_LEFTBRACE && lookahead() === TK_RIGHTBRACE) {
@@ -1159,12 +1158,12 @@ ch;
         }
         break;
       case TK_TEXT:
-        args = [lexeme(options)];
+        args = [lexeme()];
         next();
         node = newNode(Model.TEXT, [newNode(Model.VAR, args)]);
         break;
       case TK_NUM:
-        node = numberNode(options, lexeme(options));
+        node = numberNode(options, lexeme());
         next();
         break;
       case TK_LEFTCMD:   // \left .. \right
@@ -1179,7 +1178,7 @@ ch;
         }
         break;
       case TK_TYPE:
-        node = newNode(Model.TYPE, [newNode(Model.VAR, [lexeme(options)])]);
+        node = newNode(Model.TYPE, [newNode(Model.VAR, [lexeme()])]);
         next();
         break;
       case TK_LEFTBRACKET:
@@ -1277,7 +1276,7 @@ ch;
         node = newNode(Model.VEC, [braceExpr()]);
         break;
       case TK_OPERATORNAME: {
-        const lex = lexeme(options);
+        const lex = lexeme();
         next();
         node = newNode(Model.OPERATORNAME, [newNode(Model.VAR, [lex]), primaryExpr()]);
         break;
@@ -1573,7 +1572,7 @@ arg = '';
         next();
         let name;
         if (hd() === TK_VAR) {
-          name = lexeme(options);
+          name = lexeme();
           next();
         } else {
           name = '';
@@ -1787,10 +1786,10 @@ leftCmdFound;
           if (n.op === Model.VAR && n.args[0] === '\\circ') {
             // 90^{\circ} -> degree 90
             if (hd() === TK_VAR &&
-                lexeme(options) === 'K' || lexeme(options) === 'C' || lexeme(options) === 'F') {
+                lexeme() === 'K' || lexeme() === 'C' || lexeme() === 'F') {
               n = multiplyNode([
                 args.pop(),
-                unaryNode(Model.VAR, [`\\degree ${lexeme(options)}`])]);
+                unaryNode(Model.VAR, [`\\degree ${lexeme()}`])]);
               next();
             } else {
               n = multiplyNode([
@@ -1819,6 +1818,7 @@ leftCmdFound;
     }
     // Parse '10%', '4!'
     function postfixExpr() {
+      // FIXME (2\degree)\text{C} => 2(\degree\text{C})
       let t;
       let expr = exponentialExpr();
       switch (t = hd()) {
@@ -1831,20 +1831,7 @@ leftCmdFound;
         expr = newNode(Model.FACT, [expr]);
         break;
       default:
-        if (t === TK_VAR && lexeme(options) === '\\degree') {
-          next();
-          if (hd() === TK_VAR && (lexeme(options) === 'K' || lexeme(options) === 'C' || lexeme(options) === 'F')) {
-            expr = multiplyNode([
-              expr,
-              unaryNode(Model.VAR, [`\\degree ${lexeme(options)}`])]);
-            next();
-          } else {
-            expr = multiplyNode([
-              expr,
-              unaryNode(Model.VAR, ['\\degree']),
-            ]);
-          }
-        } else if (t === TK_VERTICALBAR && lookahead() === TK_UNDERSCORE) {
+        if (t === TK_VERTICALBAR && lookahead() === TK_UNDERSCORE) {
           // x|_{x=3}, x|_1^2
           next();
           const args = [expr];
@@ -1928,7 +1915,7 @@ op;
         expr = newNode(op, [expr]);
         break;
       default:
-        if (t === TK_VAR && lexeme(options) === '$') {
+        if (t === TK_VAR && lexeme() === '$') {
           next();
           if (!isEndOfMultiplicativeExpression(hd())) {
             // Give $1 a higher precedence than ordinary multiplication.
@@ -2012,8 +1999,7 @@ argArgs;
     }
     // Parse '1/2/3/4', '1 1/2', '1\frac{1}{2}'
     function fractionExpr() {
-      let t; let
-node = subscriptExpr();
+      let t; let node = subscriptExpr();
       if (isNumber(node) &&
           (hd() === TK_FRAC || hd() === TK_NUM && lookahead() === TK_SLASH)) {
         const frac = fractionExpr();
@@ -2826,7 +2812,7 @@ args = [];
           let n = commaExpr();
           assert(!hd(), message(1003, [
             scan.pos(),
-            scan.lexeme(options), `"${src.substring(scan.pos() - 1)}"`,
+            scan.lexeme(), `"${src.substring(scan.pos() - 1)}"`,
           ]));
           if (n.lbrk === TK_LEFTBRACESET) {
             n = newNode(Model.SET, [n]);
