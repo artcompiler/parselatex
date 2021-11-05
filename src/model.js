@@ -1785,8 +1785,8 @@ leftCmdFound;
           let n = unaryExpr();
           if (n.op === Model.VAR && n.args[0] === '\\circ') {
             // 90^{\circ} -> degree 90
-            if (hd() === TK_VAR &&
-                lexeme() === 'K' || lexeme() === 'C' || lexeme() === 'F') {
+            if (hd() === TK_TEXT &&
+                (lexeme() === 'K' || lexeme() === 'C' || lexeme() === 'F')) {
               n = multiplyNode([
                 args.pop(),
                 unaryNode(Model.VAR, [`\\degree ${lexeme()}`])]);
