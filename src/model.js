@@ -2344,7 +2344,8 @@ args = [];
       if (!node) {
         return false;
       }
-      if (node.op === Model.SUB && node.args.length === 1) {
+      if ((node.op === Model.SUB || node.op === Model.ADD) &&
+          node.args.length === 1) {
         node = node.args[0];
       }
       if (node.op === Model.NUM &&
