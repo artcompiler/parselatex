@@ -2121,8 +2121,7 @@ argArgs;
       return newNode(Model.DERIV, [n, sym, order]);
     }
     function multiplicativeExpr(implicitOnly = false) {
-      let t; let expr; let explicitOperator = false; let
-args = [];
+      let t; let expr; let explicitOperator = false; let args = [];
       let n0;
       expr = fractionExpr();
       if (isDerivative(expr)) {
@@ -2265,6 +2264,12 @@ args = [];
             let e = arg.args[0];
             e = isOne(e) && expr || multiplyNode([e, expr]);
             expr = newNode(Model.DERIV, [e].concat(arg.args.slice(1)));
+          } else if (expr.op === Model.VAR
+                     && expr.args[0] === '\degree'
+                     && args[0].op === Model.SUB
+                     && args[0].args.length === 1) {
+            // -2\degree. Make it an alias of -2^\circ.
+            expr = negate(multiplyNode([args[0].args[0], args.pop()]));
           }
         } else if ((t === TK_TIMES || t === TK_CDOT) && isScientific(expr.args)) {
           // 1.2 \times 10 ^ {-3}
@@ -2276,7 +2281,7 @@ args = [];
       if (args.length > 1) {
         return trimEmptyBraces(multiplyNode(args));
       }
-        return args[0];
+      return args[0];
     }
     function trimEmptyBraces(node) {
       assert(node.op === Model.MUL, '1000: Internal error');
