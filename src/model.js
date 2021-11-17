@@ -2235,10 +2235,12 @@ argArgs;
             expr = newNode(Model.DERIV, [e].concat(arg.args.slice(1)));
           } else if (expr.op === Model.VAR
                      && expr.args[0] === '\\degree'
+                     && args.length === 1
                      && args[0].op === Model.SUB
                      && args[0].args.length === 1) {
             // Make -2\degree an alias of -2^\circ.
             expr = unaryNode(Model.SUB, [multiplyNode([args[0].args[0], expr])]);
+            args.pop();
           } else {
             expr = multiplyNode([args.pop(), expr], true);
           }
