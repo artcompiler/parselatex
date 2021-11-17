@@ -2121,23 +2121,13 @@ argArgs;
       return newNode(Model.DERIV, [n, sym, order]);
     }
     function multiplicativeExpr(implicitOnly = false) {
-      let t; let expr; let explicitOperator = false; let
-args = [];
+      let t; let expr; let explicitOperator = false; let args = [];
       let n0;
       expr = fractionExpr();
       if (isDerivative(expr)) {
         expr = derivativeExpr(expr);
       }
-      if (expr.op === Model.MUL &&
-          !Model.option(options, 'compareGrouping') &&
-          expr.args[expr.args.length - 1].op !== Model.VAR &&
-          expr.args[expr.args.length - 1].args[0] === '\\degree') {
-        // FIXME binomials and all other significant syntax should not be desugared
-        // during parsing. It breaks equivLiteral and equivSyntax.
-        args = expr.args;
-      } else {
-        args = [expr];
-      }
+      args = [expr];
       // While lookahead is not a lower precedent operator
       // FIXME need a better way to organize this condition
       let loopCount = 0;
@@ -2171,7 +2161,7 @@ args = [];
           expr = derivativeExpr(expr);
         }
         if (t === TK_CDOT || t === TK_TIMES || t === TK_DIV) {
-          expr = newNode(tokenToOperator[t], [args.pop(), expr]);
+          expr = binaryNode(tokenToOperator[t], [args.pop(), expr], true);
         }
         if (!(explicitOperator ||
               args.length === 0 ||
@@ -2183,9 +2173,6 @@ args = [];
               isRepeatingDecimal([args[args.length - 1], expr]) ||
               expr.op !== Model.NUM)) {
           assert(false, 'Shouldn\'t get here');
-          // We have two adjacent numbers so merge them into one.
-          const n = args.pop();
-          expr = newNode(Model.NUM, [n.args[0] + expr.args[0]]);  // Don't use numberNode() to avoid separator checks.
         }
         assert(explicitOperator ||
                args.length === 0 ||
@@ -2199,8 +2186,6 @@ args = [];
           args.pop();
           expr = unaryNode(Model.M, [expr]);
         } else if (!explicitOperator && args.length > 0) {
-          // Attempt to make units bind harder than multiplication. Reverted
-          // because of usability and compatibility issues.
           if (args.length > 0 &&
               isMixedNumber(args[args.length - 1], expr)) {
             // 3 \frac{1}{2} -> 3 + \frac{1}{2}
@@ -2242,29 +2227,14 @@ args = [];
             if (isScientific(expr.args)) {
               expr.isScientific = true;
             }
-          } else if (!isChemCore() && isPolynomialTerm(args[args.length - 1], expr)) {
-            // 2x, -3y but not CH (in chem)
-            expr.isPolynomialTerm = true;
-            const t = args.pop();
-            if (!t.isPolynomialTerm) {
-              if (t.op === Model.MUL && t.args[t.args.length - 1].isPolynomialTerm) {
-                assert(t.args.length === 2);
-                const prefix = t.args[0];
-                const suffix = t.args[1];
-                expr.isPolynomialTerm = suffix.isPolynomialTerm = false;
-                expr = binaryNode(Model.MUL, [prefix, binaryNode(Model.MUL, [suffix, expr], true)]);
-                expr.args[1].isPolynomialTerm = true;
-                // ...
-              } else {
-                expr = binaryNode(Model.MUL, [t, expr]);
-              }
-            }
           } else if (args[args.length - 1].op === Model.DERIV) {
             // Fold expr into derivative expr.
             const arg = args.pop();
             let e = arg.args[0];
             e = isOne(e) && expr || multiplyNode([e, expr]);
             expr = newNode(Model.DERIV, [e].concat(arg.args.slice(1)));
+          } else {
+            expr = multiplyNode([args.pop(), expr], true);
           }
         } else if ((t === TK_TIMES || t === TK_CDOT) && isScientific(expr.args)) {
           // 1.2 \times 10 ^ {-3}
@@ -2273,10 +2243,7 @@ args = [];
         args.push(expr);
         assert(loopCount++ < 1000, '1000: Stuck in loop in multiplicativeExpr()');
       }
-      if (args.length > 1) {
-        return trimEmptyBraces(multiplyNode(args));
-      }
-        return args[0];
+      return args[0];
     }
     function trimEmptyBraces(node) {
       assert(node.op === Model.MUL, '1000: Internal error');
@@ -2570,22 +2537,23 @@ args = [];
     }
     function flattenNestedNodes(node) {
       let args = [];
-      if (node.op === Model.NUM || node.op === Model.VAR) {
+      let op = node.op;
+      if (op === Model.NUM || op === Model.VAR) {
         return node;
       }
-      if (node.op === Model.CDOT || node.op === Model.TIMES) {
-        node.op = Model.MUL;
+      if (op === Model.CDOT || op === Model.TIMES) {
+        op = Model.MUL;
       }
       node.args.forEach((n) => {
         n = flattenNestedNodes(n);
-        if (node.op !== Model.INTEGRAL && n.op === node.op) {
+        if (op !== Model.INTEGRAL && n.op === op) {
           args = args.concat(n.args);
         } else {
           args.push(n);
         }
       });
       const { isMixedNumber } = node;
-      node = newNode(node.op, args);
+      node = newNode(op, args);
       node.isMixedNumber = isMixedNumber;
       return node;
     }
