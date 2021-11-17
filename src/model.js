@@ -2238,7 +2238,7 @@ argArgs;
                      && args[0].op === Model.SUB
                      && args[0].args.length === 1) {
             // Make -2\degree an alias of -2^\circ.
-            expr = unaryNode(Model.SUB, [(multiplyNode([negate(args.pop()), expr]))]);
+            expr = unaryNode(Model.SUB, [multiplyNode([args[0].args[0], expr])]);
           } else {
             expr = multiplyNode([args.pop(), expr], true);
           }
