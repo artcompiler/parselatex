@@ -1133,6 +1133,8 @@ ch;
       }
       return false;
     }
+    const degreeUnits = ['K', 'C', 'F'];
+    const muAbbrevs = ['g', 'L', 'm', 's'];
     function primaryExpr() {
       let t; let node; let tk; let op; let base; let args = [];
       let expr; let expr1; let expr2; let foundDX;
@@ -1143,8 +1145,14 @@ ch;
         next();
         if (args[0] === "\\emptyset") {
           args[0] = "\\varnothing";
-        } else if (args[0] === "\\degree" && hd() === TK_TEXT && (
-          lexeme() === 'K' || lexeme() === 'C' || lexeme() === 'F')) {
+        } else if (args[0] === "\\mu" && hd() === TK_TEXT) {
+          const unit = Model.env[lexeme()];
+          const abbrev = unit && unit.abbrev;
+          if (muAbbrevs.includes(abbrev)) {
+            args[0] = `\\mu${abbrev}`;
+          }
+          next();
+        } else if (args[0] === "\\degree" && hd() === TK_TEXT && degreeUnits.includes(lexeme())) {
           args[0] = `\\degree ${lexeme()}`;
           next();
         }
