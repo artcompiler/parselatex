@@ -2004,9 +2004,15 @@ argArgs;
     // Parse '1/2/3/4', '1 1/2', '1\frac{1}{2}'
     function fractionExpr() {
       let t; let node = subscriptExpr();
+      if (isDerivative(node)) {
+        node = derivativeNode(node);
+      }
       if (isNumber(node) &&
           (hd() === TK_FRAC || hd() === TK_NUM && lookahead() === TK_SLASH)) {
         const frac = fractionExpr();
+        if (isDerivative(frac)) {
+          frac = derivativeNode(frac);
+        }
         if (isMixedNumber(node, frac)) {
           let neg;
           if (isNeg(node)) {
@@ -2108,7 +2114,7 @@ argArgs;
          denom.args[1] && denom.args[1].op === Model.POW &&
          denom.args[1].args[0] && denom.args[1].args[0].op === Model.VAR);
     }
-    function derivativeExpr(node) {
+    function derivativeNode(node) {
       if (node.op !== Model.FRAC) {
         return null;
       }
@@ -2128,9 +2134,6 @@ argArgs;
       let t; let expr; let explicitOperator = false; let args = [];
       let n0;
       expr = fractionExpr();
-      if (isDerivative(expr)) {
-        expr = derivativeExpr(expr);
-      }
       args = [expr];
       // While lookahead is not a lower precedent operator
       // FIXME need a better way to organize this condition
@@ -2143,9 +2146,6 @@ argArgs;
             t !== TK_RIGHTARROW && t !== TK_CAPRIGHTARROW && t !== TK_LT &&
             !(t === TK_VERTICALBAR && pipeTokenCount > 0) &&
             t !== TK_NEWROW && t !== TK_NEWCOL && t !== TK_END) {
-        if (isDerivative(expr)) {
-          expr.isDerivative = true;
-        }
         if (implicitOnly &&
             (isMultiplicative(t) || isFunction(t) ||
              t === TK_LEFTPAREN || t === TK_LEFTCMD || t === TK_LEFTBRACKET ||
@@ -2161,9 +2161,6 @@ argArgs;
           explicitOperator = true;
         }
         expr = fractionExpr();
-        if (isDerivative(expr)) {
-          expr = derivativeExpr(expr);
-        }
         if (t === TK_CDOT || t === TK_TIMES || t === TK_DIV) {
           expr = binaryNode(tokenToOperator[t], [args.pop(), expr], true);
         }
