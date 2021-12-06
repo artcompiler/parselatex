@@ -2005,13 +2005,13 @@ argArgs;
     function fractionExpr() {
       let t; let node = subscriptExpr();
       if (isDerivative(node)) {
-        node = derivativeNode(node);
+        return derivativeNode(node);
       }
       if (isNumber(node) &&
           (hd() === TK_FRAC || hd() === TK_NUM && lookahead() === TK_SLASH)) {
         const frac = fractionExpr();
         if (isDerivative(frac)) {
-          frac = derivativeNode(frac);
+          return derivativeNode(frac);
         }
         if (isMixedNumber(node, frac)) {
           let neg;
@@ -2120,15 +2120,15 @@ argArgs;
       }
       const numer = node.args[0];
       const denom = node.args[1];
-      const n =
-        numer.op === Model.MUL &&
-        numer.args.slice(1).length > 0 &&
-        multiplyNode(numer.args.slice(1)) || nodeOne;
+      const operand =
+            numer.op === Model.MUL && multiplyNode(numer.args.slice(1))
+            || multiplicativeExpr(true);  // Not in numer, so get operand from next expr.
       assert(denom.args.length === 2);
-      const arg = denom.args[1];
-      const sym = arg.op === Model.POW && arg.args[0] || arg;
-      const order = arg.op === Model.POW && arg.args[1] || nodeOne;
-      return newNode(Model.DERIV, [n, sym, order]);
+      const dvar = denom.args[1];
+      const sym = dvar.op === Model.POW && dvar.args[0] || dvar;
+      const order = dvar.op === Model.POW && dvar.args[1] || nodeOne;
+      node = newNode(Model.DERIV, [operand, sym, order]);
+      return node;
     }
     function multiplicativeExpr(implicitOnly = false) {
       let t; let expr; let explicitOperator = false; let args = [];
@@ -2228,12 +2228,6 @@ argArgs;
             if (isScientific(expr.args)) {
               expr.isScientific = true;
             }
-          } else if (args[args.length - 1].op === Model.DERIV) {
-            // Fold expr into derivative expr.
-            const arg = args.pop();
-            let e = arg.args[0];
-            e = isOne(e) && expr || multiplyNode([e, expr]);
-            expr = newNode(Model.DERIV, [e].concat(arg.args.slice(1)));
           } else if (expr.op === Model.VAR
                      && expr.args[0] === '\\degree'
                      && args.length === 1
