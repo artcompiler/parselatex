@@ -2246,7 +2246,12 @@ argArgs;
         args.push(expr);
         assert(loopCount++ < 1000, '1000: Stuck in loop in multiplicativeExpr()');
       }
-      return args[0];
+      let node = args[0];
+      if (node.op === Model.MUL && node.args.length > 1) {
+        // Only trim braces with implicit multiplication.
+        return trimEmptyBraces(node);
+      }
+      return node;
     }
     function trimEmptyBraces(node) {
       assert(node.op === Model.MUL, '1000: Internal error');
