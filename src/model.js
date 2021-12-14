@@ -1499,7 +1499,7 @@ ch;
             args.push(primaryExpr());
           }
         }
-        args.push(commaExpr());
+        args.push(additiveExpr());
         return newNode(tokenToOperator[tk], args);
       case TK_EXISTS:
         next();
