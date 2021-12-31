@@ -8,8 +8,8 @@ test:
 
 update-dependencies:
 	rm -f *.tgz || true
-	rm -rf node_modules
-	rm package-lock.json
+	rm -rf node_modules || true
+	rm package-lock.json || true
 	npm i
 	npm pack .
 
