@@ -2122,7 +2122,7 @@ argArgs;
       const denom = node.args[1];
       const operand =
             numer.op === Model.MUL && multiplyNode(numer.args.slice(1))
-            || multiplicativeExpr(true);  // Not in numer, so get operand from next expr.
+            || multiplicativeExpr();  // Not in numer, so get operand from next expr.
       assert(denom.args.length === 2);
       const dvar = denom.args[1];
       const sym = dvar.op === Model.POW && dvar.args[0] || dvar;
