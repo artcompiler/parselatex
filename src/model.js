@@ -1499,7 +1499,7 @@ ch;
             args.push(primaryExpr());
           }
         }
-        args.push(multiplicativeExpr());
+        args.push(multiplicativeExpr(true));
         return newNode(tokenToOperator[tk], args);
       case TK_EXISTS:
         next();
@@ -2676,7 +2676,7 @@ argArgs;
         next({ oneCharToken: true });
         args.push(primaryExpr());
       }
-      args.push(multiplicativeExpr());
+      args.push(multiplicativeExpr(true));
       return newNode(Model.LIM, args);
     }
     function isRelational(t) {
