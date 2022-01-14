@@ -184,10 +184,9 @@ export const Model = (() => {
     ADD: '+',
     SUB: '-',
     MUL: 'mul',
-    TIMES: 'times',  // Special case for '*' and '\times' in literals.
-    COEFF: 'coeff',  // Special case for numeric coefficients in literals.
-    DIV: 'div',
-    FRAC: 'frac',
+    TIMES: '\\times',  // Special case for '*' and '\times' in literals.
+    DIV: '\\div',
+    FRAC: '\\frac',
     EQL: '=',
     ATAN2: 'atan2',
     SQRT: 'sqrt',
@@ -309,7 +308,7 @@ export const Model = (() => {
     DEGREE: 'degree',
     BACKSLASH: 'backslash',
     MATHBF: 'mathbf',
-    CDOT: 'cdot',
+    CDOT: '\\cdot',
     MATHFIELD: 'mathfield',
     DELTA: 'delta',
     OPERATORNAME: 'operatorname',
