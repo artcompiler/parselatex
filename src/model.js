@@ -2282,8 +2282,7 @@ argArgs;
            n0.args.length === 1) {
         n0 = n0.args[0];
       }
-      if (!n0.lbrk && !n1.lbrk &&
-          n0.op === Model.NUM &&
+      if (n0.op === Model.NUM &&
           isProperFraction(n1)) {
         return true;
       }
