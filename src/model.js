@@ -176,7 +176,7 @@ export const Model = (() => {
   };
 
   // Render LaTex from the model node.
-  Mp.toLaTeX = function toLaTeX(node) {
+  Model.toLaTeX = Mp.toLaTeX = function toLaTeX(node) {
     return render(node);
   };
 
@@ -1142,12 +1142,12 @@ ch;
       case TK_VAR:
         args = [lexeme()];
         next();
-        if (args[0] === "\\emptyset") {
-          args[0] = "\\varnothing";
-        } else if (args[0] === "\\mu" && hd() === TK_TEXT && muUnits.includes(lexeme())) {
+        if (args[0] === '\\emptyset') {
+          args[0] = '\\varnothing';
+        } else if (args[0] === '\\mu' && hd() === TK_TEXT && muUnits.includes(lexeme())) {
           args[0] = `\\mu${lexeme()}`;
           next();
-        } else if (args[0] === "\\degree" && hd() === TK_TEXT && degreeUnits.includes(lexeme())) {
+        } else if (args[0] === '\\degree' && hd() === TK_TEXT && degreeUnits.includes(lexeme())) {
           args[0] = `\\degree ${lexeme()}`;
           next();
         }
@@ -2245,7 +2245,7 @@ argArgs;
         args.push(expr);
         assert(loopCount++ < 1000, '1000: Stuck in loop in multiplicativeExpr()');
       }
-      let node = args[0];
+      const node = args[0];
       if (node.op === Model.MUL && node.args.length > 1) {
         // Only trim braces with implicit multiplication.
         return trimEmptyBraces(node);
@@ -2284,29 +2284,6 @@ argArgs;
       }
       if (n0.op === Model.NUM &&
           isProperFraction(n1)) {
-        return true;
-      }
-      return false;
-    }
-
-    function isPolynomialPart(n) {
-      return (
-        n.op === Model.NUM ||
-        isVar(n) ||
-        n.op === Model.FORMAT &&
-        n.args[0].op === Model.VAR &&
-        ['\\integer', '\\decimal', '\\number', '\\variable'].includes(n.args[0].args[0])
-      );
-    }
-
-    function isPolynomialTerm(n0, n1) {
-      // 3x but not 3(x)
-      if (n0.op === Model.SUB && n0.args.length === 1) {
-        n0 = n0.args[0];
-      }
-      if (!n0.lbrk && !n1.lbrk &&
-          (isPolynomialPart(n0) && isPolynomialPart(n1) ||
-           n0.op === Model.MUL && n0.args[n0.args.length - 1].isPolynomialTerm && isPolynomialPart(n1))) {
         return true;
       }
       return false;
@@ -2431,7 +2408,7 @@ argArgs;
         const a = args[0];
         const e = args[1];
         if ((n = isNumber(a)) &&
-            (1 <= +n.args[0] && +n.args[0] < 10) &&
+            (+n.args[0] >= 1 && +n.args[0] < 10) &&
             e.op === Model.POW &&
             (n = isNumber(e.args[0])) && n.args[0] === '10' &&
             isInteger(e.args[1])) {
@@ -2621,11 +2598,15 @@ argArgs;
         expr = integralExpr(TK_IIINT);
         foundDX = hasDX(options, flattenNestedNodes(multiplicativeExpr()));
       } else if (hd() === TK_IINT || tk === TK_IIINT) {
-        tk === TK_IIINT || eat(TK_IINT);
+        if (tk !== TK_IIINT) {
+          eat(TK_IINT);
+        }
         expr = integralExpr(TK_IINT);
         foundDX = hasDX(options, flattenNestedNodes(multiplicativeExpr()));
       } else {
-        tk === TK_IINT || eat(TK_INT);
+        if (tk !== TK_IINT) {
+          eat(TK_INT);
+        }
         // Collect the subscript and expression
         if (hd() === TK_UNDERSCORE) {
           next({ oneCharToken: true });
@@ -2663,7 +2644,7 @@ argArgs;
       args.push(foundDX || nodeEmpty);
       // [sub, sup,  expr, var], [expr, var]
       Model.option(options, 'parsingIntegralExpr', parsingIntegralExpr);
-      assert(foundDX, message(1014, [src.replace(new RegExp('\\\\', 'g'), '\\')]));
+      assert(foundDX, message(1014, [src.replace(/\\\\/g, '\\')]));
       return newNode(Model.INTEGRAL, args);
     }
     function limitExpr() {
