@@ -223,7 +223,6 @@ export const Model = (() => {
     VAR: 'var',
     TEXT: 'text',
     NUM: 'num',
-    CST: 'cst',
     COMMA: ',',
     POW: '^',
     SUBSCRIPT: '_',
@@ -457,20 +456,26 @@ lastCharCode;
     } else if (typeof n === 'object') {
       // Render sub-expressions.
       const args = [];
-      for (let i = 0; i < n.args.length; i++) {
-        args[i] = render(n.args[i]);
-      }
+      n.args.forEach(function (arg) {
+        args.push(render(arg));
+      });
       // Render operator.
       switch (n.op) {
       case OpStr.NUM:
-        text = n.args[0];
-        break;
       case OpStr.VAR:
+        text = `${n.args[0]}`;
+        break;
       case OpStr.TEXT:
         text = `\\text{${args[0]}}`;
         break;
-      case OpStr.CST:
-        text = ` ${n.args[0]} `;
+      case OpStr.SUBSCRIPT:
+        args.reverse().forEach(function (arg, index) {
+          if (index === args.length-1) {
+            text = `${arg}${text}`;
+          } else {
+            text = `${OpToLaTeX[n.op]}{${arg}${text}}`;
+          }
+        });
         break;
       case OpStr.SUB:
         if (n.args.length === 1) {
@@ -544,8 +549,12 @@ lastCharCode;
           break;
         }
         break;
-      case OpStr.INT:
-        text = `\\int ${args[0]}`;
+      case OpStr.INTEGRAL:
+        if (args.length === 4) {
+          text = `\\int_{${args[0]}}^{${args[1]}} ${args[2]} d${args[3]}`;
+        } else {
+          text = `\\int ${args[0]} d${args[1]}`;
+        }
         break;
       case OpStr.VEC:
         text = `\\vec{${args[0]}}`;
@@ -569,7 +578,6 @@ lastCharCode;
             text += args[index];
           } else if (term.op === OpStr.PAREN ||
                      term.op === OpStr.VAR ||
-                     term.op === OpStr.CST ||
                      typeof prevTerm === 'number' && typeof term !== 'number') {
             // Elide the times symbol if rhs is parenthesized or a var, or lhs is a number
             // nd rhs is not a number.
@@ -585,6 +593,7 @@ lastCharCode;
         break;
       }
       case OpStr.TIMES:
+      case OpStr.CDOT:
       case OpStr.ADD:
       case OpStr.COMMA:
         args.forEach((value, index) => {
