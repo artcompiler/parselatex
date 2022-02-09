@@ -456,7 +456,7 @@ lastCharCode;
     } else if (typeof n === 'object') {
       // Render sub-expressions.
       const args = [];
-      n.args.forEach(function (arg) {
+      n.args.forEach((arg) => {
         args.push(render(arg));
       });
       // Render operator.
@@ -469,8 +469,8 @@ lastCharCode;
         text = `\\text{${args[0]}}`;
         break;
       case OpStr.SUBSCRIPT:
-        args.reverse().forEach(function (arg, index) {
-          if (index === args.length-1) {
+        args.reverse().forEach((arg, index) => {
+          if (index === args.length - 1) {
             text = `${arg}${text}`;
           } else {
             text = `${OpToLaTeX[n.op]}{${arg}${text}}`;
