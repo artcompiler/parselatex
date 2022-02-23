@@ -2147,7 +2147,7 @@ argArgs;
       // FIXME need a better way to organize this condition
       let loopCount = 0;
       while ((t = hd()) && !isAdditive(t) && !isRelational(t) && !isImplies(t) &&
-            t !== TK_COMMA && t !== TK_SEMICOLON && !isEquality(t) &&
+            t !== TK_COMMA && t !== TK_SEMICOLON && t !== TK_COLON && !isEquality(t) &&
             t !== TK_RIGHTBRACE && t !== TK_RIGHTBRACESET && t !== TK_RIGHTPAREN &&
             t !== TK_RIGHTCMD && t !== TK_RANGLE &&
             !((t === TK_LEFTBRACKET || t === TK_RIGHTBRACKET) && bracketTokenCount > 0) &&
@@ -2667,10 +2667,20 @@ argArgs;
       args.push(multiplicativeExpr());
       return newNode(Model.LIM, args);
     }
+    function ratioExpr() {
+      let t;
+      let expr = additiveExpr();
+      while ((t = hd()) === TK_COLON) {
+        next();
+        let expr2 = additiveExpr();
+        expr = binaryNode(Model.COLON, [expr, expr2], true);
+      }
+      return expr;
+    }
     function isRelational(t) {
       return t === TK_LT || t === TK_LE || t === TK_GT || t === TK_GE ||
         t === TK_NGTR || t === TK_NLESS ||
-        t === TK_IN || t === TK_TO || t === TK_COLON ||
+        t === TK_IN || t === TK_TO ||
         t === TK_PERP || t === TK_PROPTO ||
         t === TK_NI || t === TK_NOT ||
         t === TK_SUBSETEQ || t === TK_SUPSETEQ ||
@@ -2681,7 +2691,7 @@ argArgs;
     // x + y > z ==> (x + y) > z, x + (y > z)
     function relationalExpr() {
       let t = hd();
-      let expr = additiveExpr();
+      let expr = ratioExpr();
       const args = [];
       let isNot = false;
       while (isRelational(t = hd())) {
@@ -2692,7 +2702,7 @@ argArgs;
           isNot = true;
           continue;
         }
-        const expr2 = additiveExpr();
+        const expr2 = ratioExpr();
         expr = newNode(tokenToOperator[t], [expr, expr2]);
         if (isNot) {
           // Modify with not.
@@ -2722,7 +2732,7 @@ argArgs;
              t === TK_RIGHTARROW) {
         // x = y = z -> [x = y, y = z]
         next();
-        const expr2 = additiveExpr();
+        const expr2 = ratioExpr();
         expr = newNode(tokenToOperator[t], [expr, expr2]);
         args.push(expr);
         // Make a copy of the reused node.
