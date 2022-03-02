@@ -2668,11 +2668,10 @@ argArgs;
       return newNode(Model.LIM, args);
     }
     function ratioExpr() {
-      let t;
       let expr = additiveExpr();
-      while ((t = hd()) === TK_COLON) {
+      while (hd() === TK_COLON) {
         next();
-        let expr2 = additiveExpr();
+        const expr2 = additiveExpr();
         expr = binaryNode(Model.COLON, [expr, expr2], true);
       }
       return expr;
