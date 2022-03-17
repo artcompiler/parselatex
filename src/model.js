@@ -2538,7 +2538,8 @@ argArgs;
       }
       node.args.forEach((n) => {
         n = flattenNestedNodes(n);
-        if (op !== Model.INTEGRAL && n.op === op) {
+        if (op !== Model.INTEGRAL && n.op === op &&
+            n.args.length > 1) {
           args = args.concat(n.args);
         } else {
           args.push(n);
