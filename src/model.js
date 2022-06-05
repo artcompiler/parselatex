@@ -2946,6 +2946,9 @@ argArgs;
       const unicodeToLaTeX = {
         0x00A2: '\\cent',
         0x00B0: '\\degree',
+        0x2190: "\\leftarrow",
+        0x2192: "\\rightarrow",
+        0x21CC: "\\rightleftharpoons",
         0x2200: '\\forall',
         0x2201: '\\complement',
         0x2202: '\\partial',
@@ -3202,11 +3205,12 @@ argArgs;
         0x22FD: null,
         0x22FE: null,
         0x22FF: null,
+        0x27F7: "\\longleftrightarrow",
         0x03B1: '\\alpha',
         0x03B2: '\\beta',
         0x03B3: '\\gamma',
         0x03B4: '\\delta',
-        0x03B5: '\\varepsilon',
+        0x03B5: '\\epsilon',
         0x03B6: '\\zeta',
         0x03B7: '\\eta',
         0x03B8: '\\theta',
@@ -3257,6 +3261,7 @@ argArgs;
         0x03A7: 'X',
         0x03A8: '\\Psi',
         0x03A9: '\\Omega',
+        0x03F5: "\\epsilon",
       };
       const identifiers = Object.keys(env);
       // Add keywords to the list of identifiers.
@@ -3278,7 +3283,16 @@ argArgs;
         let t;
         while (curIndex < src.length) {
           let tk;
-          switch ((c = src.charCodeAt(curIndex++))) {
+          c = src.charCodeAt(curIndex++);
+          if (c === 0xD835) {
+            // Normalize varepsilon surrogate pair.
+            if (src.charCodeAt(curIndex++) === 0xDEC6) {
+              c = 0x03B5;
+            } else {
+              assert(false, message(1004, [String.fromCharCode(c), c]));
+            }
+          }
+          switch (c) {
           case 32:  // space
           case 9:   // tab
           case 10:  // new line
@@ -3512,6 +3526,7 @@ argArgs;
             lexeme += String.fromCharCode(c);
             c = src.charCodeAt(curIndex++);
           }
+          lexeme = lexeme === '\\varepsilon' && '\\epsilon' || lexeme;
           curIndex--;
         }
         let tk = lexemeToToken[lexeme];
