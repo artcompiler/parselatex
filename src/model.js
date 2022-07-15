@@ -2022,6 +2022,11 @@ argArgs;
           return derivativeNode(frac);
         }
         if (isMixedNumber(node, frac)) {
+          let isPercent;
+          if (frac.op === Model.PERCENT) {
+            frac = frac.args[0];
+            isPercent = true;
+          }
           let neg;
           if (isNeg(node)) {
             neg = true;
@@ -2031,6 +2036,9 @@ argArgs;
           node.isMixedNumber = true;
           if (neg) {
             node = negate(node);
+          }
+          if (isPercent === true) {
+            node = newNode(Model.PERCENT, [node]);
           }
         } else {
           node = binaryNode(Model.MUL, [node, frac]);
@@ -2043,7 +2051,12 @@ argArgs;
         node.isFraction = isSimpleFraction(node);
         node.isSlash = t === TK_SLASH;
       }
-      return node;
+      if (node.op === Model.FRAC && node.args[1].op === Model.PERCENT) {
+        node = newNode(Model.PERCENT, [
+          newNode(Model.FRAC, [node.args[0], node.args[1].args[0]])
+        ]);
+      }
+     return node;
     }
     function isMathSymbol(n) {
       if (n.op !== Model.VAR) {
@@ -2290,6 +2303,9 @@ argArgs;
       if ((n0.op === Model.SUB || n0.op === Model.ADD) &&
            n0.args.length === 1) {
         n0 = n0.args[0];
+      }
+      if (n1.op === Model.PERCENT) {
+        n1 = n1.args[0];
       }
       if (n0.op === Model.NUM &&
           isProperFraction(n1)) {
