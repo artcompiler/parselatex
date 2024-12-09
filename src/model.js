@@ -904,7 +904,8 @@ lastCharCode;
     function matchThousandsSeparator(ch, lastSeparator) {
       // Check separator and return if there is a match.
       let match = '';
-      if (Model.option(options, 'allowThousandsSeparator') || Model.option(options, 'setThousandsSeparator')) {
+      if (Model.option(options, 'allowThousandsSeparator') ||
+          Model.option(options, 'setThousandsSeparator')) {
         let separators = Model.option(options, 'setThousandsSeparator');
         separators = [].concat(separators !== undefined ? separators : ',');
         // If the character matches the last separator or, if not, last is undefined

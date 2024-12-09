@@ -1,7 +1,7 @@
 {
   "name": "@artcompiler/parselatex",
   "type": "module",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "A library for parsing LaTeX",
   "main": "index.js",
   "scripts": {
