@@ -133,7 +133,6 @@ export const Model = (() => {
     model = create(options, this);
     model.location = location;
     if (typeof node === 'string') {
-      // console.log('mathcore/create() node=' + node);
       // Got a string, so parse it into a node.
       const parser = parse(options, node, Model.env);
       node = parser.expr();
@@ -406,8 +405,7 @@ export const Model = (() => {
   }
   function stripInvisible(src) {
     let out = '';
-    let c; let
-lastCharCode;
+    let c; let lastCharCode;
     let curIndex = 0;
     while (curIndex < src.length) {
       while (curIndex < src.length && isInvisibleCharCode((c = src.charCodeAt(curIndex++)))) {
@@ -900,6 +898,9 @@ lastCharCode;
   const nodeEmpty = newNode(Model.NONE, [newNode(Model.VAR, ['None'])]);
 
   const parse = function parse(options, src, env) {
+    const identifiers = Object.keys(env);
+    // Add keywords to the list of identifiers.
+    identifiers.push('to');
     src = stripInvisible(src);
     function matchThousandsSeparator(ch, lastSeparator) {
       // Check separator and return if there is a match.
@@ -1949,14 +1950,27 @@ op;
     // x^2_1 => x_1^2
     function subscriptExpr() {
       const args = [unaryExpr()];
-      while (hd() === TK_UNDERSCORE) {
-        next({ oneCharToken: true });
-        args.push(exponentialExpr());
-        if (isChemCore()) {
-          if (hd() === TK_LEFTBRACE) {
-            // C_2{}^3 -> C_2^3
-            eat(TK_LEFTBRACE);
-            eat(TK_RIGHTBRACE);
+      if (args[0].op === OpStr.VAR && hd() === TK_NUM) {
+        const ident = args[0].args + lexeme();
+        const match = identifiers.some((u) => {
+          // Check of not an explicit variable and has a prefix that is a unit.
+          return u.indexOf(ident) === 0;
+        });
+        if (match) {
+          args.push(multiplyNode([args.pop(), unaryExpr()]));
+        }
+        // If we have a name in the environment, so bind more tightly than the
+        // context.
+      } else {
+        while (hd() === TK_UNDERSCORE) {
+          next({ oneCharToken: true });
+          args.push(exponentialExpr());
+          if (isChemCore()) {
+            if (hd() === TK_LEFTBRACE) {
+              // C_2{}^3 -> C_2^3
+              eat(TK_LEFTBRACE);
+              eat(TK_RIGHTBRACE);
+            }
           }
         }
       }
@@ -3280,14 +3294,15 @@ argArgs;
         0x03A9: '\\Omega',
         0x03F5: "\\epsilon",
       };
-      const identifiers = Object.keys(env);
-      // Add keywords to the list of identifiers.
-      identifiers.push('to');
       function isAlphaCharCode(c) {
         return (
           c >= 65 && c <= 90 ||
           c >= 97 && c <= 122
         );
+      }
+
+      function isNumericCharCode(c) {
+        return c >= 48 && c <= 57;
       }
 
       function start(options) {
@@ -3491,7 +3506,7 @@ argArgs;
         const startIndex = curIndex + 1;
         while (isAlphaCharCode(c) || c === CC_SINGLEQUOTE) {
           // All single character names are valid variable lexemes. Now we check
-          // for longer match against unit names. The longest one wins.
+          // for longer match against env names. The longest one wins.
           c = src.charCodeAt(curIndex++);
           if (!isAlphaCharCode(c)) {
             // Past end of identifier.
