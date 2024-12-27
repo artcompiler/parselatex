@@ -1951,16 +1951,16 @@ op;
     function subscriptExpr() {
       const args = [unaryExpr()];
       if (args[0].op === OpStr.VAR && hd() === TK_NUM) {
-        const ident = args[0].args + lexeme();
+        const ident = args[0].args[0].toUpperCase() + lexeme();
+        // Check if is a name in the environment.
         const match = identifiers.some((u) => {
-          // Check of not an explicit variable and has a prefix that is a unit.
           return u.indexOf(ident) === 0;
         });
         if (match) {
+          // We have a name in the environment, so bind more tightly than the
+          // context.
           args.push(multiplyNode([args.pop(), unaryExpr()]));
         }
-        // If we have a name in the environment, so bind more tightly than the
-        // context.
       } else {
         while (hd() === TK_UNDERSCORE) {
           next({ oneCharToken: true });
