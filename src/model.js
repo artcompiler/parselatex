@@ -1153,23 +1153,42 @@ ch;
       case TK_VAR:
         args = [lexeme()];
         next();
-        if (args[0] === '\\emptyset') {
-          args[0] = '\\varnothing';
-        } else if (args[0] === '\\mu' && hd() === TK_TEXT && muUnits.includes(lexeme())) {
-          args[0] = `\\mu${lexeme()}`;
-          next();
-        } else if (args[0] === '\\degree' && hd() === TK_TEXT && degreeUnits.includes(lexeme())) {
-          args[0] = `\\degree ${lexeme()}`;
-          next();
-        }
-        node = newNode(Model.VAR, args);
-        if (isChemCore()) {
-          if (hd() === TK_LEFTBRACE && lookahead() === TK_RIGHTBRACE) {
-            // C_2{}^3 -> C_2^3
-            eat(TK_LEFTBRACE);
-            eat(TK_RIGHTBRACE);
+        if (hd() === TK_NUM) {
+          const ident = args[0].toUpperCase() + lexeme();
+          // Check if is a name in the environment.
+          const match = identifiers.some((u) => {
+            return u.indexOf(ident) === 0;
+          });
+          node = newNode(Model.VAR, args);
+          if (match) {
+            // We have a name in the environment, so bind more tightly than the
+            // context.
+            node = multiplyNode([node, numberNode(options, lexeme())]);
+            next();
+          }
+        } else {
+          if (args[0] === '\\emptyset') {
+            args[0] = '\\varnothing';
+          } else if (args[0] === '\\mu' && hd() === TK_TEXT && muUnits.includes(lexeme())) {
+            args[0] = `\\mu${lexeme()}`;
+            next();
+          } else if (args[0] === '\\degree' && hd() === TK_TEXT && degreeUnits.includes(lexeme())) {
+            args[0] = `\\degree ${lexeme()}`;
+            next();
+          }
+          node = newNode(Model.VAR, args);
+          if (isChemCore()) {
+            if (hd() === TK_LEFTBRACE && lookahead() === TK_RIGHTBRACE) {
+              // C_2{}^3 -> C_2^3
+              eat(TK_LEFTBRACE);
+              eat(TK_RIGHTBRACE);
+            }
           }
         }
+        console.log(
+          "primaryExpr()",
+          "node=" + JSON.stringify(node, null, 2)
+        );
         break;
       case TK_TEXT:
         args = [lexeme()];
@@ -1950,27 +1969,14 @@ op;
     // x^2_1 => x_1^2
     function subscriptExpr() {
       const args = [unaryExpr()];
-      if (args[0].op === OpStr.VAR && hd() === TK_NUM) {
-        const ident = args[0].args[0].toUpperCase() + lexeme();
-        // Check if is a name in the environment.
-        const match = identifiers.some((u) => {
-          return u.indexOf(ident) === 0;
-        });
-        if (match) {
-          // We have a name in the environment, so bind more tightly than the
-          // context.
-          args.push(multiplyNode([args.pop(), unaryExpr()]));
-        }
-      } else {
-        while (hd() === TK_UNDERSCORE) {
-          next({ oneCharToken: true });
-          args.push(exponentialExpr());
-          if (isChemCore()) {
-            if (hd() === TK_LEFTBRACE) {
-              // C_2{}^3 -> C_2^3
-              eat(TK_LEFTBRACE);
-              eat(TK_RIGHTBRACE);
-            }
+      while (hd() === TK_UNDERSCORE) {
+        next({ oneCharToken: true });
+        args.push(exponentialExpr());
+        if (isChemCore()) {
+          if (hd() === TK_LEFTBRACE) {
+            // C_2{}^3 -> C_2^3
+            eat(TK_LEFTBRACE);
+            eat(TK_RIGHTBRACE);
           }
         }
       }

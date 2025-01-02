@@ -1,7 +1,7 @@
 {
   "name": "@artcompiler/parselatex",
   "type": "module",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "A library for parsing LaTeX",
   "main": "index.js",
   "scripts": {
@@ -15,8 +15,8 @@
   },
   "homepage": "https://github.com/artcompiler/parselatex#readme",
   "engines": {
-    "node": "v15.14.0",
-    "npm": "7.7.6"
+    "node": "^v15.14.0",
+    "npm": "^7.7.6"
   },
   "devDependencies": {
     "@jest/globals": "^27.2.0",
