@@ -1185,10 +1185,6 @@ ch;
             }
           }
         }
-        console.log(
-          "primaryExpr()",
-          "node=" + JSON.stringify(node, null, 2)
-        );
         break;
       case TK_TEXT:
         args = [lexeme()];
